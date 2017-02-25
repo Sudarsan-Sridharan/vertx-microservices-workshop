@@ -137,3 +137,6 @@ hs_err_pid*
 
 # Asciidctor plugin
 .asciidoctor
+
+*.iml
+.idea

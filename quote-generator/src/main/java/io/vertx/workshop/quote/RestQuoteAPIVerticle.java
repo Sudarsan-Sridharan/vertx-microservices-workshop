@@ -1,5 +1,6 @@
 package io.vertx.workshop.quote;
 
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.Json;
@@ -25,8 +26,9 @@ public class RestQuoteAPIVerticle extends AbstractVerticle {
           // Quotes are json objects you can retrieve from the message body
           // The map is structured as follows: name -> quote
           // ----
-
-          // ----
+            JsonObject quote = message.body();
+            quotes.put(quote.getString("name"), quote);
+            // ----
         });
 
 
@@ -35,18 +37,27 @@ public class RestQuoteAPIVerticle extends AbstractVerticle {
           HttpServerResponse response = request.response()
               .putHeader("content-type", "application/json");
 
-          // TODO
+            @Nullable String companyName = request.getParam("name");
+
+            // TODO
           // The request handler returns a specific quote if the `name` parameter is set, or the whole map if none.
           // To write the response use: `request.response().end(content)`
           // Responses are returned as JSON, so don't forget the "content-type": "application/json" header.
           // If the symbol is set but not found, you should return 404.
           // Once the request handler is set,
 
-          response
-              .end(Json.encodePrettily(quotes));
-
           // ----
+            if (companyName != null) {
+                JsonObject quote = quotes.get(companyName);
 
+                if (quote != null) {
+                    response.end(quote.encodePrettily());
+                } else {
+                    response.setStatusCode(404).end();
+                }
+            } else {
+                response.end(Json.encodePrettily(quotes));
+            }
           // ----
         })
         .listen(config().getInteger("http.port"), ar -> {
